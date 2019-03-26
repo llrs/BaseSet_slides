@@ -11,10 +11,15 @@ output:
       highlightLines: true
       countIncrementalSlides: false
 ---
+
+```{r knitr, echo=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, tidy = TRUE)
+```
+
 # Getting Started
 
 A set is a group of elements, so we can define elements and the name they are grouped:
-```{r init_base, echo=FALSE}
+```{r init_base, echo=FALSE, results=FALSE}
 library("BaseSet")
 ```
 
