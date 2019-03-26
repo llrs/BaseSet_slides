@@ -1,0 +1,87 @@
+---
+title: "BaseSet"
+subtitle: "set storage and manipulation"
+author: "Lluís Revilla"
+date: "2019/03/26 (updated: `r Sys.Date()`)"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+# Getting Started
+
+A set is a group of elements, so we can define elements and the name they are grouped:
+```{r init_base, echo=FALSE}
+library("BaseSet")
+```
+
+```{r init}
+library("BaseSet")
+```
+.pull-left[
+With a data.frame:
+```{r TS_df}
+relations <- data.frame(sets = c(rep("a", 5), "b"),
+                        elements = letters[seq_len(6)])
+(TS1 <- tidySet(relations))
+```
+]
+.pull-right[
+With a list:
+```{r TS_list}
+relations <- list(a = letters[seq_len(5)], 
+                  b = letters[6])
+(TS2 <- tidySet(relations))
+```
+]
+
+---
+
+# Integrating with GSEABase
+
+Converting from previous data formats
+## From GeneSet
+
+```{r GSEABase, echo=FALSE, include=FALSE}
+library("GSEABase", quietly = TRUE, warn.conflicts = FALSE, verbose = FALSE)
+```
+
+```{r GeneSet}
+gs1 <- GeneSet(setName = "set1", setIdentifier = "101",
+               geneIds = c("a", "b"))
+gs2 <- GeneSet(setName = "set2", setIdentifier = "102",
+               geneIds = c("b", "c"))
+(GS1 <- tidy(gs1))
+(GS2 <- tidy(gs2))
+```
+
+---
+## From GeneSetCollection
+
+```{r}
+gsc <- GeneSetCollection(gs1, gs2)
+(TS <- tidy(gsc))
+```
+
+---
+
+## From GeneColorSet
+
+```{r}
+data("sample.ExpressionSet", package = "Biobase")
+gcs1 <- GSEABase::GeneColorSet(sample.ExpressionSet[100:109],
+                               phenotype = "imaginary")
+(TS <- tidy(gcs1))
+```
+
+---
+
+# Session info
+
+```{r sessionInfo, echo=FALSE}
+sessionInfo("BaseSet")
+```
+

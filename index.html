@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+  <head>
+    <title>BaseSet</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Lluís Revilla" />
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/default-fonts.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# BaseSet
+## set storage and manipulation
+### Lluís Revilla
+### 2019/03/26 (updated: 2019-03-26)
+
+---
+
+# Getting Started
+
+A set is a group of elements, so we can define elements and the name they are grouped:
+
+```
+## 
+## Attaching package: 'BaseSet'
+```
+
+```
+## The following object is masked from 'package:stats':
+## 
+##     filter
+```
+
+```
+## The following object is masked from 'package:base':
+## 
+##     union
+```
+
+
+```r
+library("BaseSet")
+```
+.pull-left[
+With a data.frame:
+
+```r
+relations &lt;- data.frame(sets = c(rep("a", 5), "b"),
+                        elements = letters[seq_len(6)])
+(TS1 &lt;- tidySet(relations))
+```
+
+```
+##   elements sets
+## 1        a    a
+## 2        b    a
+## 3        c    a
+## 4        d    a
+## 5        e    a
+## 6        f    b
+```
+]
+.pull-right[
+With a list:
+
+```r
+relations &lt;- list(a = letters[seq_len(5)], 
+                  b = letters[6])
+(TS2 &lt;- tidySet(relations))
+```
+
+```
+##   elements sets
+## 1        a    a
+## 2        b    a
+## 3        c    a
+## 4        d    a
+## 5        e    a
+## 6        f    b
+```
+]
+
+---
+
+# Integrating with GSEABase
+
+Converting from previous data formats
+## From GeneSet
+
+
+
+
+```r
+gs1 &lt;- GeneSet(setName = "set1", setIdentifier = "101",
+               geneIds = c("a", "b"))
+gs2 &lt;- GeneSet(setName = "set2", setIdentifier = "102",
+               geneIds = c("b", "c"))
+(GS1 &lt;- tidy(gs1))
+```
+
+```
+##   elements sets Identifier shortDescripton longDescription organism
+## 1        a set1        101                                         
+## 2        b set1        101
+```
+
+```r
+(GS2 &lt;- tidy(gs2))
+```
+
+```
+##   elements sets Identifier shortDescripton longDescription organism
+## 1        b set2        102                                         
+## 2        c set2        102
+```
+
+---
+## From GeneSetCollection
+
+
+```r
+gsc &lt;- GeneSetCollection(gs1, gs2)
+(TS &lt;- tidy(gsc))
+```
+
+```
+##   elements sets Identifier shortDescripton longDescription organism
+## 1        a set1        101                                         
+## 2        b set1        101                                         
+## 3        b set2        102                                         
+## 4        c set2        102
+```
+
+---
+
+## From GeneColorSet
+
+
+```r
+data("sample.ExpressionSet", package = "Biobase")
+gcs1 &lt;- GSEABase::GeneColorSet(sample.ExpressionSet[100:109],
+                               phenotype = "imaginary")
+```
+
+```
+## 
+```
+
+```
+## 
+```
+
+```r
+(TS &lt;- tidy(gcs1))
+```
+
+```
+##    elements sets                               Identifier
+## 1  31339_at set1 IBP10001:5570:Tue Mar 26 17:51:52 2019:1
+## 2  31340_at set1 IBP10001:5570:Tue Mar 26 17:51:52 2019:1
+## 3  31341_at set1 IBP10001:5570:Tue Mar 26 17:51:52 2019:1
+## 4  31342_at set1 IBP10001:5570:Tue Mar 26 17:51:52 2019:1
+## 5  31343_at set1 IBP10001:5570:Tue Mar 26 17:51:52 2019:1
+## 6  31344_at set1 IBP10001:5570:Tue Mar 26 17:51:52 2019:1
+## 7  31345_at set1 IBP10001:5570:Tue Mar 26 17:51:52 2019:1
+## 8  31346_at set1 IBP10001:5570:Tue Mar 26 17:51:52 2019:1
+## 9  31347_at set1 IBP10001:5570:Tue Mar 26 17:51:52 2019:1
+## 10 31348_at set1 IBP10001:5570:Tue Mar 26 17:51:52 2019:1
+##              shortDescripton
+## 1  Smoking-Cancer Experiment
+## 2  Smoking-Cancer Experiment
+## 3  Smoking-Cancer Experiment
+## 4  Smoking-Cancer Experiment
+## 5  Smoking-Cancer Experiment
+## 6  Smoking-Cancer Experiment
+## 7  Smoking-Cancer Experiment
+## 8  Smoking-Cancer Experiment
+## 9  Smoking-Cancer Experiment
+## 10 Smoking-Cancer Experiment
+##                                              longDescription     organism
+## 1  An example object of expression set (ExpressionSet) class Homo sapiens
+## 2  An example object of expression set (ExpressionSet) class Homo sapiens
+## 3  An example object of expression set (ExpressionSet) class Homo sapiens
+## 4  An example object of expression set (ExpressionSet) class Homo sapiens
+## 5  An example object of expression set (ExpressionSet) class Homo sapiens
+## 6  An example object of expression set (ExpressionSet) class Homo sapiens
+## 7  An example object of expression set (ExpressionSet) class Homo sapiens
+## 8  An example object of expression set (ExpressionSet) class Homo sapiens
+## 9  An example object of expression set (ExpressionSet) class Homo sapiens
+## 10 An example object of expression set (ExpressionSet) class Homo sapiens
+##    pubMedIds              urls   contributor          type
+## 1            www.lab.not.exist Pierre Fermat ExpressionSet
+## 2            www.lab.not.exist Pierre Fermat ExpressionSet
+## 3            www.lab.not.exist Pierre Fermat ExpressionSet
+## 4            www.lab.not.exist Pierre Fermat ExpressionSet
+## 5            www.lab.not.exist Pierre Fermat ExpressionSet
+## 6            www.lab.not.exist Pierre Fermat ExpressionSet
+## 7            www.lab.not.exist Pierre Fermat ExpressionSet
+## 8            www.lab.not.exist Pierre Fermat ExpressionSet
+## 9            www.lab.not.exist Pierre Fermat ExpressionSet
+## 10           www.lab.not.exist Pierre Fermat ExpressionSet
+```
+
+---
+
+# Session info
+
+
+```
+## R version 3.5.3 (2019-03-11)
+## Platform: x86_64-pc-linux-gnu (64-bit)
+## Running under: Ubuntu 16.04.6 LTS
+## 
+## Matrix products: default
+## BLAS: /usr/lib/openblas-base/libblas.so.3
+## LAPACK: /usr/lib/libopenblasp-r0.2.18.so
+## 
+## locale:
+##  [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+##  [3] LC_TIME=es_ES.UTF-8        LC_COLLATE=en_US.UTF-8    
+##  [5] LC_MONETARY=es_ES.UTF-8    LC_MESSAGES=en_US.UTF-8   
+##  [7] LC_PAPER=es_ES.UTF-8       LC_NAME=C                 
+##  [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+## [11] LC_MEASUREMENT=es_ES.UTF-8 LC_IDENTIFICATION=C       
+## 
+## attached base packages:
+## character(0)
+## 
+## other attached packages:
+## [1] BaseSet_0.0.0.9003
+## 
+## loaded via a namespace (and not attached):
+##  [1] Rcpp_1.0.1           prettyunits_1.0.2    ps_1.3.0            
+##  [4] assertthat_0.2.1     rprojroot_1.3-2      digest_0.6.18       
+##  [7] R6_2.4.0             backports_1.1.3      stats4_3.5.3        
+## [10] RSQLite_2.1.1        evaluate_0.13        xaringan_0.9        
+## [13] pillar_1.3.1         utils_3.5.3          rlang_0.3.2         
+## [16] lazyeval_0.2.2       curl_3.3             rstudioapi_0.10     
+## [19] annotate_1.60.1      whisker_0.3-2        callr_3.2.0         
+## [22] blob_1.1.1           S4Vectors_0.20.1     hgu95av2.db_3.2.3   
+## [25] rmarkdown_1.12       desc_1.2.0           devtools_2.0.1      
+## [28] stringr_1.4.0        RCurl_1.95-4.12      bit_1.1-14          
+## [31] compiler_3.5.3       xfun_0.5             pkgconfig_2.0.2     
+## [34] stats_3.5.3          BiocGenerics_0.28.0  pkgbuild_1.0.3      
+## [37] covrpage_0.0.68      htmltools_0.3.6      tidyselect_0.2.5    
+## [40] tibble_2.1.1         IRanges_2.16.0       audio_0.1-6         
+## [43] grDevices_3.5.3      XML_3.98-1.19        crayon_1.3.4        
+## [46] dplyr_0.8.0.1        withr_2.1.2          bitops_1.0-6        
+## [49] GSEABase_1.44.0      xtable_1.8-3         DBI_1.0.0           
+## [52] git2r_0.25.2         magrittr_1.5         covr_3.2.1          
+## [55] datasets_3.5.3       graph_1.60.0         cli_1.1.0           
+## [58] stringi_1.4.3        fs_1.2.7             remotes_2.0.2       
+## [61] rex_1.1.2            testthat_2.0.1       graphics_3.5.3      
+## [64] cyclocomp_1.1.0      base_3.5.3           org.Hs.eg.db_3.7.0  
+## [67] tools_3.5.3          bit64_0.9-7          Biobase_2.42.0      
+## [70] glue_1.3.1           purrr_0.3.2          processx_3.3.0      
+## [73] pkgload_1.0.2        parallel_3.5.3       yaml_2.2.0          
+## [76] AnnotationDbi_1.44.0 sessioninfo_1.1.1    memoise_1.1.0       
+## [79] beepr_1.3            knitr_1.22           methods_3.5.3       
+## [82] usethis_1.4.0.9000
+```
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();</script>
+
+<script>
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
