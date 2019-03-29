@@ -2,7 +2,8 @@
 title: "BaseSet"
 subtitle: "set storage and manipulation"
 author: "Lluís Revilla"
-date: "2019/03/26 (updated: `r Sys.Date()`)"
+date: "2019/03/29 (updated: `r Sys.Date()`)"
+twitter: "@Lluis_Rev"
 output:
   xaringan::moon_reader:
     lib_dir: libs
@@ -10,38 +11,46 @@ output:
       highlightStyle: github
       highlightLines: true
       countIncrementalSlides: false
+editor_options: 
+  chunk_output_type: console
 ---
 
-```{r knitr, echo=FALSE}
-knitr::opts_chunk$set(collapse = TRUE, tidy = TRUE)
+```{r knitr_setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, tidy = TRUE, cache = FALSE)
 ```
 
-# Getting Started
+# Where do I started?
 
 A set is a group of elements, so we can define elements and the name they are grouped:
-```{r init_base, echo=FALSE, results=FALSE}
-library("BaseSet")
-```
+
+![](https://raw.githubusercontent.com/llrs/GSEAdv/master/vignettes/GSEAdv.jpg)
+
+
+Testing other methods from this prespective in [GSEAdv](https://github.com/llrs/GSEAdv) but it took to long for some methods, that's when I started exploring with BaseSet 
 
 ```{r init}
 library("BaseSet")
 ```
-.pull-left[
-With a data.frame:
-```{r TS_df}
+
+Later on I found that there was a discussion about making GSEABase faster/more efficient
+
+---
+
+## Sets
+
+- With a data.frame:
+```{r TS_df, results='markup'}
 relations <- data.frame(sets = c(rep("a", 5), "b"),
                         elements = letters[seq_len(6)])
-(TS1 <- tidySet(relations))
+(TS1 <- BaseSet::tidySet(relations))
 ```
-]
-.pull-right[
-With a list:
-```{r TS_list}
+
+- With a list:
+```{r TS_list, results='markup'}
 relations <- list(a = letters[seq_len(5)], 
                   b = letters[6])
-(TS2 <- tidySet(relations))
+(TS2 <- BaseSet::tidySet(relations))
 ```
-]
 
 ---
 
@@ -59,8 +68,8 @@ gs1 <- GeneSet(setName = "set1", setIdentifier = "101",
                geneIds = c("a", "b"))
 gs2 <- GeneSet(setName = "set2", setIdentifier = "102",
                geneIds = c("b", "c"))
-(GS1 <- tidy(gs1))
-(GS2 <- tidy(gs2))
+(GS1 <- BaseSet::tidy(gs1))
+(GS2 <- BaseSet::tidy(gs2))
 ```
 
 ---
@@ -68,7 +77,7 @@ gs2 <- GeneSet(setName = "set2", setIdentifier = "102",
 
 ```{r}
 gsc <- GeneSetCollection(gs1, gs2)
-(TS <- tidy(gsc))
+(TS_gsc <- BaseSet::tidy(gsc))
 ```
 
 ---
@@ -77,16 +86,95 @@ gsc <- GeneSetCollection(gs1, gs2)
 
 ```{r}
 data("sample.ExpressionSet", package = "Biobase")
-gcs1 <- GSEABase::GeneColorSet(sample.ExpressionSet[100:109],
+gcs1 <- GeneColorSet(sample.ExpressionSet[100:109],
                                phenotype = "imaginary")
-(TS <- tidy(gcs1))
+TS <- BaseSet::tidy(gcs1)
+BaseSet::sets(TS)
+BaseSet::elements(TS)
 ```
 
 ---
 
-# Session info
-
-```{r sessionInfo, echo=FALSE}
-sessionInfo("BaseSet")
+```{r print}
+TS
 ```
 
+---
+
+## Operations
+
+Convert ids:
+
+```{r operations, strip.white=FALSE}
+library("magrittr")
+library("hgu95av2.db")
+BaseSet::mutate_element(TS,  
+        symbol = mapIds(hgu95av2.db, keys = as.character(elements), 
+                        keytype = "PROBEID", column = "SYMBOL"),
+        elements = mapIds(hgu95av2.db, keys = as.character(elements), 
+                          keytype = "PROBEID", column = "ENTREZID")) %>% 
+    BaseSet::elements()
+```
+
+
+---
+
+- Intersection
+
+```{r intersection}
+TS_gsc %>% 
+    BaseSet::intersection(c("set1", "set2"))
+```
+
+- Union
+
+```{r union, error=TRUE}
+BaseSet::union(TS_gsc, c("set1", "set2"))
+sets(TS_gsc) <- sets(TS_gsc)[, 1, drop = FALSE]
+BaseSet::union(TS_gsc, c("set1", "set2"))
+```
+
+- Incidence
+```{r incidence}
+BaseSet::incidence(TS_gsc)
+```
+
+---
+
+## Fuzzy sets
+
+When doing several analysis different results or bootstrapping on the same result it might be important to store the strength of this relationship:
+
+- With a data.frame:
+```{r TS_df_fuzzy, results='markup'}
+relations <- data.frame(sets = c(rep("a", 5), "b"),
+                        elements = letters[seq_len(6)],
+                        fuzzy = runif(6))
+(TS1 <- BaseSet::tidySet(relations))
+```
+
+---
+
+- With a list:
+```{r TS_list_fuzzy, results='markup'}
+A <- runif(5)
+names(A) <- letters[seq_len(5)]
+B <- runif(1)
+names(B) <- letters[3]
+relations <- list(A = A, B = B)
+(TS2 <- BaseSet::tidySet(relations))
+```
+
+---
+- Intersection
+```{r intersection_fuzzy}
+BaseSet::intersection(TS2, c("A", "B"))
+```
+- Union
+```{r union_fuzzy}
+BaseSet::union(TS2, c("A", "B"))
+```
+-  Incidence
+```{r incidence_fuzzy}
+BaseSet::incidence(TS2)
+```

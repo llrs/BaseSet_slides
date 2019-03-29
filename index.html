@@ -14,28 +14,38 @@ class: center, middle, inverse, title-slide
 # BaseSet
 ## set storage and manipulation
 ### Lluís Revilla
-### 2019/03/26 (updated: 2019-03-26)
+### 2019/03/29 (updated: 2019-03-28)
 
 ---
 
 
 
 
-# Getting Started
+# Where do I started?
 
 A set is a group of elements, so we can define elements and the name they are grouped:
 
+![](https://raw.githubusercontent.com/llrs/GSEAdv/master/vignettes/GSEAdv.jpg)
+
+
+Testing other methods from this prespective in [GSEAdv](https://github.com/llrs/GSEAdv) but it took to long for some methods, that's when I started exploring with BaseSet 
 
 
 ```r
 library("BaseSet")
 ```
-.pull-left[
-With a data.frame:
+
+Later on I found that there was a discussion about making GSEABase faster/more efficient
+
+---
+
+## Sets
+
+- With a data.frame:
 
 ```r
 relations &lt;- data.frame(sets = c(rep("a", 5), "b"), elements = letters[seq_len(6)])
-(TS1 &lt;- tidySet(relations))
+(TS1 &lt;- BaseSet::tidySet(relations))
 ##   elements sets
 ## 1        a    a
 ## 2        b    a
@@ -44,13 +54,12 @@ relations &lt;- data.frame(sets = c(rep("a", 5), "b"), elements = letters[seq_le
 ## 5        e    a
 ## 6        f    b
 ```
-]
-.pull-right[
-With a list:
+
+- With a list:
 
 ```r
 relations &lt;- list(a = letters[seq_len(5)], b = letters[6])
-(TS2 &lt;- tidySet(relations))
+(TS2 &lt;- BaseSet::tidySet(relations))
 ##   elements sets
 ## 1        a    a
 ## 2        b    a
@@ -59,7 +68,6 @@ relations &lt;- list(a = letters[seq_len(5)], b = letters[6])
 ## 5        e    a
 ## 6        f    b
 ```
-]
 
 ---
 
@@ -74,11 +82,11 @@ Converting from previous data formats
 ```r
 gs1 &lt;- GeneSet(setName = "set1", setIdentifier = "101", geneIds = c("a", "b"))
 gs2 &lt;- GeneSet(setName = "set2", setIdentifier = "102", geneIds = c("b", "c"))
-(GS1 &lt;- tidy(gs1))
+(GS1 &lt;- BaseSet::tidy(gs1))
 ##   elements sets Identifier shortDescripton longDescription organism
 ## 1        a set1        101                                         
 ## 2        b set1        101
-(GS2 &lt;- tidy(gs2))
+(GS2 &lt;- BaseSet::tidy(gs2))
 ##   elements sets Identifier shortDescripton longDescription organism
 ## 1        b set2        102                                         
 ## 2        c set2        102
@@ -90,7 +98,7 @@ gs2 &lt;- GeneSet(setName = "set2", setIdentifier = "102", geneIds = c("b", "c")
 
 ```r
 gsc &lt;- GeneSetCollection(gs1, gs2)
-(TS &lt;- tidy(gsc))
+(TS_gsc &lt;- BaseSet::tidy(gsc))
 ##   elements sets Identifier shortDescripton longDescription organism
 ## 1        a set1        101                                         
 ## 2        b set1        101                                         
@@ -105,19 +113,47 @@ gsc &lt;- GeneSetCollection(gs1, gs2)
 
 ```r
 data("sample.ExpressionSet", package = "Biobase")
-gcs1 &lt;- GSEABase::GeneColorSet(sample.ExpressionSet[100:109], phenotype = "imaginary")
-(TS &lt;- tidy(gcs1))
-##    elements sets                               Identifier
-## 1  31339_at set1 IBP10001:5782:Tue Mar 26 18:00:38 2019:2
-## 2  31340_at set1 IBP10001:5782:Tue Mar 26 18:00:38 2019:2
-## 3  31341_at set1 IBP10001:5782:Tue Mar 26 18:00:38 2019:2
-## 4  31342_at set1 IBP10001:5782:Tue Mar 26 18:00:38 2019:2
-## 5  31343_at set1 IBP10001:5782:Tue Mar 26 18:00:38 2019:2
-## 6  31344_at set1 IBP10001:5782:Tue Mar 26 18:00:38 2019:2
-## 7  31345_at set1 IBP10001:5782:Tue Mar 26 18:00:38 2019:2
-## 8  31346_at set1 IBP10001:5782:Tue Mar 26 18:00:38 2019:2
-## 9  31347_at set1 IBP10001:5782:Tue Mar 26 18:00:38 2019:2
-## 10 31348_at set1 IBP10001:5782:Tue Mar 26 18:00:38 2019:2
+gcs1 &lt;- GeneColorSet(sample.ExpressionSet[100:109], phenotype = "imaginary")
+TS &lt;- BaseSet::tidy(gcs1)
+BaseSet::sets(TS)
+##   sets                                 Identifier
+## 1 set1 IBP10001:16652:Thu Mar 28 16:57:37 2019:20
+##             shortDescripton
+## 1 Smoking-Cancer Experiment
+##                                             longDescription     organism
+## 1 An example object of expression set (ExpressionSet) class Homo sapiens
+##   pubMedIds              urls   contributor          type
+## 1           www.lab.not.exist Pierre Fermat ExpressionSet
+BaseSet::elements(TS)
+##    elements
+## 1  31339_at
+## 2  31340_at
+## 3  31341_at
+## 4  31342_at
+## 5  31343_at
+## 6  31344_at
+## 7  31345_at
+## 8  31346_at
+## 9  31347_at
+## 10 31348_at
+```
+
+---
+
+
+```r
+TS
+##    elements sets                                 Identifier
+## 1  31339_at set1 IBP10001:16652:Thu Mar 28 16:57:37 2019:20
+## 2  31340_at set1 IBP10001:16652:Thu Mar 28 16:57:37 2019:20
+## 3  31341_at set1 IBP10001:16652:Thu Mar 28 16:57:37 2019:20
+## 4  31342_at set1 IBP10001:16652:Thu Mar 28 16:57:37 2019:20
+## 5  31343_at set1 IBP10001:16652:Thu Mar 28 16:57:37 2019:20
+## 6  31344_at set1 IBP10001:16652:Thu Mar 28 16:57:37 2019:20
+## 7  31345_at set1 IBP10001:16652:Thu Mar 28 16:57:37 2019:20
+## 8  31346_at set1 IBP10001:16652:Thu Mar 28 16:57:37 2019:20
+## 9  31347_at set1 IBP10001:16652:Thu Mar 28 16:57:37 2019:20
+## 10 31348_at set1 IBP10001:16652:Thu Mar 28 16:57:37 2019:20
 ##              shortDescripton
 ## 1  Smoking-Cancer Experiment
 ## 2  Smoking-Cancer Experiment
@@ -155,63 +191,139 @@ gcs1 &lt;- GSEABase::GeneColorSet(sample.ExpressionSet[100:109], phenotype = "im
 
 ---
 
-# Session info
+## Operations
+
+Convert ids:
 
 
+```r
+library("magrittr")
+library("hgu95av2.db")
+BaseSet::mutate_element(TS, symbol = mapIds(hgu95av2.db, keys = as.character(elements), 
+    keytype = "PROBEID", column = "SYMBOL"), elements = mapIds(hgu95av2.db, 
+    keys = as.character(elements), keytype = "PROBEID", column = "ENTREZID")) %&gt;% 
+    BaseSet::elements()
+## 'select()' returned 1:1 mapping between keys and columns
+## 'select()' returned 1:1 mapping between keys and columns
+##    elements    symbol
+## 1     51050      PI15
+## 2      9313     MMP20
+## 3      3748     KCNC3
+## 4      2590    GALNT2
+## 5      3557     IL1RN
+## 6     28778  IGLV6-57
+## 7      9407 TMPRSS11D
+## 8     26584      DUX1
+## 9      3537     IGLC1
+## 10     &lt;NA&gt;      &lt;NA&gt;
 ```
-## R version 3.5.3 (2019-03-11)
-## Platform: x86_64-pc-linux-gnu (64-bit)
-## Running under: Ubuntu 16.04.6 LTS
-## 
-## Matrix products: default
-## BLAS: /usr/lib/openblas-base/libblas.so.3
-## LAPACK: /usr/lib/libopenblasp-r0.2.18.so
-## 
-## locale:
-##  [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
-##  [3] LC_TIME=es_ES.UTF-8        LC_COLLATE=en_US.UTF-8    
-##  [5] LC_MONETARY=es_ES.UTF-8    LC_MESSAGES=en_US.UTF-8   
-##  [7] LC_PAPER=es_ES.UTF-8       LC_NAME=C                 
-##  [9] LC_ADDRESS=C               LC_TELEPHONE=C            
-## [11] LC_MEASUREMENT=es_ES.UTF-8 LC_IDENTIFICATION=C       
-## 
-## attached base packages:
-## character(0)
-## 
-## other attached packages:
-## [1] BaseSet_0.0.0.9003
-## 
-## loaded via a namespace (and not attached):
-##  [1] Biobase_2.42.0       pkgload_1.0.2        jsonlite_1.6        
-##  [4] bit64_0.9-7          assertthat_0.2.1     stats4_3.5.3        
-##  [7] grDevices_3.5.3      blob_1.1.1           yaml_2.2.0          
-## [10] remotes_2.0.2        sessioninfo_1.1.1    pillar_1.3.1        
-## [13] RSQLite_2.1.1        backports_1.1.3      glue_1.3.1          
-## [16] base_3.5.3           digest_0.6.18        promises_1.0.1      
-## [19] htmltools_0.3.6      httpuv_1.5.0         GSEABase_1.44.0     
-## [22] xaringan_0.9         XML_3.98-1.19        pkgconfig_2.0.2     
-## [25] devtools_2.0.1       servr_0.13           purrr_0.3.2         
-## [28] xtable_1.8-3         processx_3.3.0       whisker_0.3-2       
-## [31] later_0.8.0          git2r_0.25.2         tibble_2.1.1        
-## [34] annotate_1.60.1      datasets_3.5.3       IRanges_2.16.0      
-## [37] usethis_1.4.0.9000   withr_2.1.2          covrpage_0.0.68     
-## [40] BiocGenerics_0.28.0  lazyeval_0.2.2       cli_1.1.0           
-## [43] magrittr_1.5         crayon_1.3.4         memoise_1.1.0       
-## [46] evaluate_0.13        ps_1.3.0             methods_3.5.3       
-## [49] beepr_1.3            fs_1.2.7             utils_3.5.3         
-## [52] pkgbuild_1.0.3       graph_1.60.0         tools_3.5.3         
-## [55] prettyunits_1.0.2    org.Hs.eg.db_3.7.0   cyclocomp_1.1.0     
-## [58] formatR_1.6          stringr_1.4.0        S4Vectors_0.20.1    
-## [61] hgu95av2.db_3.2.3    AnnotationDbi_1.44.0 stats_3.5.3         
-## [64] callr_3.2.0          rex_1.1.2            compiler_3.5.3      
-## [67] covr_3.2.1           rlang_0.3.2          RCurl_1.95-4.12     
-## [70] rstudioapi_0.10      graphics_3.5.3       bitops_1.0-6        
-## [73] rmarkdown_1.12       testthat_2.0.1       DBI_1.0.0           
-## [76] curl_3.3             R6_2.4.0             knitr_1.22          
-## [79] dplyr_0.8.0.1        bit_1.1-14           rprojroot_1.3-2     
-## [82] desc_1.2.0           stringi_1.4.3        parallel_3.5.3      
-## [85] Rcpp_1.0.1           audio_0.1-6          tidyselect_0.2.5    
-## [88] xfun_0.5
+
+
+---
+
+- Intersection
+
+
+```r
+TS_gsc %&gt;% BaseSet::intersection(c("set1", "set2"))
+##   elements      sets Identifier shortDescripton longDescription organism
+## 1        b set1∩set2       &lt;NA&gt;            &lt;NA&gt;            &lt;NA&gt;     &lt;NA&gt;
+```
+
+- Union
+
+
+```r
+BaseSet::union(TS_gsc, c("set1", "set2"))
+## Error: Duplicated sets but with different information
+sets(TS_gsc) &lt;- sets(TS_gsc)[, 1, drop = FALSE]
+BaseSet::union(TS_gsc, c("set1", "set2"))
+##   elements      sets
+## 1        a set1∪set2
+## 2        b set1∪set2
+## 3        c set1∪set2
+```
+
+- Incidence
+
+```r
+BaseSet::incidence(TS_gsc)
+##   set1 set2
+## a    1    0
+## b    1    1
+## c    0    1
+```
+
+---
+
+## Fuzzy sets
+
+When doing several analysis different results or bootstrapping on the same result it might be important to store the strength of this relationship:
+
+- With a data.frame:
+
+```r
+relations &lt;- data.frame(sets = c(rep("a", 5), "b"), elements = letters[seq_len(6)], 
+    fuzzy = runif(6))
+(TS1 &lt;- BaseSet::tidySet(relations))
+##   elements sets      fuzzy
+## 1        a    a 0.73890495
+## 2        b    a 0.10801634
+## 3        c    a 0.89345813
+## 4        d    a 0.12541371
+## 5        e    a 0.72362393
+## 6        f    b 0.01386686
+```
+
+---
+
+- With a list:
+
+```r
+A &lt;- runif(5)
+names(A) &lt;- letters[seq_len(5)]
+B &lt;- runif(1)
+names(B) &lt;- letters[3]
+relations &lt;- list(A = A, B = B)
+(TS2 &lt;- BaseSet::tidySet(relations))
+##   elements sets      fuzzy
+## 1        a    A 0.89259590
+## 2        b    A 0.14489438
+## 3        c    A 0.44805864
+## 4        c    B 0.05329086
+## 5        d    A 0.17113448
+## 6        e    A 0.43514494
+```
+
+---
+- Intersection
+
+```r
+BaseSet::intersection(TS2, c("A", "B"))
+##   elements sets      fuzzy
+## 1        c  A∩B 0.05329086
+```
+- Union
+
+```r
+BaseSet::union(TS2, c("A", "B"))
+##   elements sets     fuzzy
+## 1        a  A∪B 0.8925959
+## 2        b  A∪B 0.1448944
+## 3        c  A∪B 0.4480586
+## 4        d  A∪B 0.1711345
+## 5        e  A∪B 0.4351449
+```
+-  Incidence
+
+```r
+BaseSet::incidence(TS2)
+##           A          B
+## a 0.8925959 0.00000000
+## b 0.1448944 0.00000000
+## c 0.4480586 0.05329086
+## d 0.1711345 0.00000000
+## e 0.4351449 0.00000000
 ```
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
